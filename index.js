@@ -9,11 +9,18 @@ const database = require("./data/database");
 // set commands
 client.commands = command.Initialize();
 
-// show history
-database.Show();
-
 // main
-client.once('ready', () => console.log('Connected.'));
+client.once(
+  'ready', 
+  () => 
+  {    
+    console.log('Connected.');
+        
+    // show history
+    database.Show();
+    //database.Load('history.json');
+    //database.Dump('history.json');
+  });
 
 client.on(
   'interactionCreate', 

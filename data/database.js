@@ -28,28 +28,65 @@ async function SetKey(key, value)
   await db.set(key, value);    
 }
 
-async function GetKeyValue(key)
-{
-  let value = await db.get(key);
-  console.log("||" + key + ": " +　value);
-  return value;
-}
-
 async function DeleteKey(key)
 {
   await db.delete(key);
 }
 
+async function GetKeyValue(key)
+{
+  let value = await db.get(key);
+  //console.log("||" + key + ": " +　value);
+  return value;
+}
+
+async function GetPair(key)
+{
+  let value = await db.get(key);
+  return [key, value];
+}
+
 function Show()
 {
   db.list().then(
-    keys =>
+    keys => 
     {
-      for (var key of keys)
+      const promises = [];
+      for(var key of keys)
       {
-        GetKeyValue(key);    
+        // let promise = new Promise(
+        //   resolve =>
+        //   {
+        //     GetKeyValue(key).then(
+        //       value =>
+        //       {
+        //         resolve([key, value]);
+        //       });
+        //   });
+        
+        promises.push(GetPair(key));
       }
+
+      Promise.all(promises).then(
+        results =>
+        {
+          for(var history of results)
+          {
+            const channel_name = history[0];
+            const context = history[1];
+            console.log(channel_name + "\n" + context);
+          }
+        });
     });
+  
+  // db.list().then(
+  //   keys =>
+  //   {
+  //     for (var key of keys)
+  //     {
+  //       GetKeyValue(key);    
+  //     }
+  //   });
 }
 
 function Load(jsonFile)
@@ -73,13 +110,62 @@ function Load(jsonFile)
       let json = JSON.parse(data);
 
       // Init db
-      for(let i = 0; i < json.length; i++) 
+      history = json["history"];
+      for(let i = 0; i < history.length; i++) 
       {
-        let obj = json[i];
+        let obj = history[i];
 
+        console.log(obj);
         SetKey(obj["channel_name"], obj["context"]);
-      }      
+      }
+
+      console.log(jsonFile + " loaded.");
     });
 }
 
-module.exports = { Load, Show, SetKey, GetKeyValue };
+function Dump(jsonFile)
+{
+  db.list().then(
+    keys => 
+    {
+      const promises = [];
+      for(var key of keys)
+      {
+        promises.push(GetPair(key));
+      }
+
+      Promise.all(promises).then(
+        results =>
+        {
+          var jsonObj = 
+          {
+            history : []
+          };
+          
+          for(var history of results)
+          {
+            jsonObj.history.push(
+              {
+                channel_name: history[0],
+                context: history[1]
+              });
+          }
+
+          var json = JSON.stringify(jsonObj, null, "\t");
+          console.log(json);
+        // won't persist due to security issue
+        //   fs.writeFile(
+        //     jsonFile, json, 'utf8', 
+        //     function(err, data)
+        //     {
+        //       if(err)
+        //       {
+        //         console.log(err);
+        //       }
+        //       console.log("File dumped.");
+        //     });
+        });
+    });
+}
+
+module.exports = { Load, Dump, Show, SetKey, GetKeyValue };
