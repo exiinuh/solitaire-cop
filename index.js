@@ -1,6 +1,8 @@
 const { Client, Intents } = require('discord.js');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
+const { pinyin } = require('pinyin-pro');
+
 const command = require("./utils/command");
 const ui = require("./utils/ui");
 const server = require("./utils/server");
@@ -53,11 +55,13 @@ client.on(
       if (interaction.customId === 'tuiModal')
       {
         const answer = interaction.fields.getTextInputValue('tuiModalInput');
+
+        // empty answer is not acceptable
         if(!answer)
         {
           return interaction.reply( `${interaction.user}: *退!* *捣乱警告!*`);
         }
-        
+    
         // check database
         database.GetKeyValue(interaction.channel.name)
           .then(
@@ -76,12 +80,43 @@ client.on(
               else
               {          
                 console.log("not duplicate");
+
+                // check pinyin
+                const lastAnswer = history[history.length - 1];
+                const lastWord = lastAnswer[lastAnswer.length - 1];
+                const lastWordPinyin = pinyin(
+                  lastWord, 
+                  { 
+                    toneType: 'none', 
+                    type: 'array', 
+                    multiple: true
+                  });
                 
-                history.push(answer);
-                database.SetKey(interaction.channel.name, history);
+                const firstWord = answer[0];
+                const firstWordPinyin = pinyin(
+                  firstWord, 
+                  { 
+                    toneType: 'none', 
+                    type: 'array', 
+                    multiple: true
+                  });
                 
-                interaction.message.edit({components: []});
-                return interaction.reply({ content: `${interaction.user}: *嗬!* **【${answer}】**`, components: [ui.CreateButtonRow()] });
+                console.log(lastWordPinyin);
+                console.log(firstWordPinyin);
+
+                const filteredArray = lastWordPinyin.filter(value => firstWordPinyin.includes(value));                
+                if (filteredArray.length == 0)
+                {
+                  return interaction.reply( `${interaction.user}: *退!* **【${answer}】** *首尾不相连!*`);
+                }
+                else
+                {
+                  history.push(answer);
+                  database.SetKey(interaction.channel.name, history);
+                  
+                  interaction.message.edit({components: []});
+                  return interaction.reply({ content: `${interaction.user}: *嗬!* **【${answer}】**`, components: [ui.CreateButtonRow()] });
+                }
               }
             });
         
@@ -89,31 +124,6 @@ client.on(
         // interaction.channel.messages.fetch({ limit: 100 }).then(
         //   async messages => 
         //   {
-        //     var latestMsg = null;
-        //     messages.forEach(
-        //       msg => 
-        //       {
-        //         const content = ui.ParseWord(msg.content);
-
-        //         if (latestMsg === null && msg.components.length != 0)
-        //         {
-        //           latestMsg = msg;
-        //         }
-
-        //         //console.log(`${answer}`+ ' ' + `${content}`);
-        //         if (`${answer}` === content)
-        //         {
-        //           latestMsg = null;
-        //           return interaction.reply( `${interaction.user}: *退!* **【${answer}】** *重复警告!*`);
-        //         }
-        //       })
-
-        //     if (latestMsg != null)
-        //     {
-        //       latestMsg.edit({components: []});
-        //     }
-
-        //     return interaction.reply({ content: `${interaction.user}: *嗬!* **【${answer}】**`, components: [ui.CreateButtonRow()] });
         //   });
       }
       else
@@ -152,40 +162,6 @@ client.on(
                 return interaction.reply(`*重新开始！*`);
               }
             });
-        
-        // // fetch message history
-        // interaction.channel.messages.fetch({ limit: 10 }).then(
-        //   async messages => 
-        //   {
-        //     var lastMsg = null;
-        //     const content = ui.ParseWord(interaction.message.content);
-        //     messages.every(
-        //       msg => 
-        //       {       
-        //         const currentContent = ui.ParseWord(msg.content);
-        //         if (currentContent && content != currentContent && msg.content.includes('嗬'))
-        //         {
-        //           lastMsg = msg;
-        //           return false;
-        //         }
-                
-        //         return true;
-        //       });
-            
-        //     if (lastMsg != null)
-        //     {
-        //       interaction.message
-        //         .react('❌')
-        //         .then(
-        //           () => interaction.message.edit({components: []})
-        //           );
-        //       return interaction.reply({ content: `${lastMsg.content}`, components: [ui.CreateButtonRow()] });
-        //     }
-        //     else
-        //     {
-        //       return interaction.reply(`*重新开始！*`);
-        //     }       
-        //   });
       }
     }
     else
