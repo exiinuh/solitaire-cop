@@ -1,9 +1,8 @@
 const { Client, Intents } = require('discord.js');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
-const { pinyin } = require('pinyin-pro');
-
 const command = require("./utils/command");
+const cop = require("./utils/cop-enforcement");
 const ui = require("./utils/ui");
 const server = require("./utils/server");
 const database = require("./data/database");
@@ -61,64 +60,35 @@ client.on(
         {
           return interaction.reply( `${interaction.user}: *退!* *捣乱警告!*`);
         }
-    
-        // check database
-        database.GetKeyValue(interaction.channel.name)
-          .then(
-            history =>
+
+        // validate the answer
+        cop.Check(answer, interaction.channel.name).then(
+          result =>
+          {
+            console.log(result);
+            
+            switch(result) 
             {
-              if (history === null)
-              {
-                history = [];
-              }
-              
-              if (history.includes(answer))
-              {
-                console.log("duplicate");
+              case cop.CheckResult.SUCCESS:
+                interaction.message.edit({components: []});
+                return interaction.reply({ content: `${interaction.user}: *嗬!* **【${answer}】**`, components: [ui.CreateButtonRow()] });
+                
+              case cop.CheckResult.DUPLICATE:
                 return interaction.reply( `${interaction.user}: *退!* **【${answer}】** *重复警告!*`);
-              }
-              else
-              {          
-                console.log("not duplicate");
-
-                // check pinyin
-                const lastAnswer = history[history.length - 1];
-                const lastWord = lastAnswer[lastAnswer.length - 1];
-                const lastWordPinyin = pinyin(
-                  lastWord, 
-                  { 
-                    toneType: 'none', 
-                    type: 'array', 
-                    multiple: true
-                  });
                 
-                const firstWord = answer[0];
-                const firstWordPinyin = pinyin(
-                  firstWord, 
-                  { 
-                    toneType: 'none', 
-                    type: 'array', 
-                    multiple: true
-                  });
+              case cop.CheckResult.INVALID_LENGTH:
+                // code block
+                break;
                 
-                console.log(lastWordPinyin);
-                console.log(firstWordPinyin);
-
-                const filteredArray = lastWordPinyin.filter(value => firstWordPinyin.includes(value));                
-                if (filteredArray.length == 0)
-                {
-                  return interaction.reply( `${interaction.user}: *退!* **【${answer}】** *首尾不相连!*`);
-                }
-                else
-                {
-                  history.push(answer);
-                  database.SetKey(interaction.channel.name, history);
-                  
-                  interaction.message.edit({components: []});
-                  return interaction.reply({ content: `${interaction.user}: *嗬!* **【${answer}】**`, components: [ui.CreateButtonRow()] });
-                }
-              }
-            });
+              case cop.CheckResult.INVALID_CONTEXT:
+                return interaction.reply( `${interaction.user}: *退!* **【${answer}】** *首尾不相连!*`);
+                
+              default:
+                // code block
+                console.log("???");
+                break;
+            }
+          });
         
         // // fetch message history
         // interaction.channel.messages.fetch({ limit: 100 }).then(
@@ -129,39 +99,30 @@ client.on(
       else
       if (interaction.customId === 'nopeModal')
       {  
-        const answer = interaction.fields.getTextInputValue('nopeModalInput');
-        if(!answer || answer != 'YES')
+        const isNope = interaction.fields.getTextInputValue('nopeModalInput');
+        if(!isNope || isNope != 'YES')
         {
           return;
         }
 
-        // check database
-        database.GetKeyValue(interaction.channel.name)
-          .then(
-            history =>
+        const answer = ui.ParseWord(interaction.message.content);
+        cop.Revert(answer, interaction.channel.name).then(
+          result =>
+          {
+            if (result != "")
             {
-              // remove from database
-              const content = ui.ParseWord(interaction.message.content);
-              const index = history.indexOf(content);
-              history.splice(index, 1);
-              database.SetKey(interaction.channel.name, history);
-
-              if (history.length > 0)
-              {
-                const lastContent = history[history.length - 1];
-                              
-                interaction.message
-                  .react('❌')
-                  .then(
-                    () => interaction.message.edit({components: []})
-                    );
-                return interaction.reply({ content: `回溯: *嗬!* **【${lastContent}】**`, components: [ui.CreateButtonRow()] });
-              }
-              else
-              {
-                return interaction.reply(`*重新开始！*`);
-              }
-            });
+              interaction.message
+                .react('❌')
+                .then(
+                  () => interaction.message.edit({components: []})
+                  );
+              return interaction.reply({ content: `回溯: *嗬!* **【${result}】**`, components: [ui.CreateButtonRow()] });          
+            }
+            else
+            {
+              return interaction.reply(`*重新开始！*`);
+            }            
+          });
       }
     }
     else
