@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const ui = require("../utils/ui");
+
+const cop = require("../utils/cop-enforcement");
 
 module.exports = 
 {
@@ -17,6 +18,7 @@ module.exports =
     }
     else
     {
+      await cop.SetLength(length, interaction.channel.name);
       await interaction.reply({ content: `*嗬！字数设定为* **${length}**` });
     }
 	},

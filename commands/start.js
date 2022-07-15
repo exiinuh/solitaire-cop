@@ -17,6 +17,7 @@ module.exports =
     }
     else
     {
+      await cop.SetLength(length, interaction.channel.name);
       await interaction.reply({ content: `*嗬！字数设定为* **${length}**`, components: [ui.CreateButtonRow()] });
     }
 	},

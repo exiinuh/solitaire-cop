@@ -40,6 +40,17 @@ async function GetKeyValue(key)
   return value;
 }
 
+async function GetKeyValues(keys)
+{
+  const promises = [];
+  for(var key of keys)
+  {
+    promises.push(GetKeyValue(key));
+  }
+  
+  return await Promise.all(promises);
+}
+
 async function GetPair(key)
 {
   let value = await db.get(key);
@@ -168,4 +179,4 @@ function Dump(jsonFile)
     });
 }
 
-module.exports = { Load, Dump, Show, SetKey, GetKeyValue };
+module.exports = { Load, Dump, Show, SetKey, GetKeyValue, GetKeyValues };

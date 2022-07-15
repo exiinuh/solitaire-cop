@@ -64,9 +64,7 @@ client.on(
         // validate the answer
         cop.Check(answer, interaction.channel.name).then(
           result =>
-          {
-            console.log(result);
-            
+          { 
             switch(result) 
             {
               case cop.CheckResult.SUCCESS:
@@ -77,8 +75,7 @@ client.on(
                 return interaction.reply( `${interaction.user}: *退!* **【${answer}】** *重复警告!*`);
                 
               case cop.CheckResult.INVALID_LENGTH:
-                // code block
-                break;
+                return interaction.reply( `${interaction.user}: *退!* **【${answer}】** *字数不符合!*`);
                 
               case cop.CheckResult.INVALID_CONTEXT:
                 return interaction.reply( `${interaction.user}: *退!* **【${answer}】** *首尾不相连!*`);
@@ -120,7 +117,7 @@ client.on(
             }
             else
             {
-              return interaction.reply(`*重新开始！*`);
+              return interaction.reply(`*重新开始!*`);
             }            
           });
       }
