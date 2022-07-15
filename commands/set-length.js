@@ -4,8 +4,8 @@ const ui = require("../utils/ui");
 module.exports = 
 {
 	data: new SlashCommandBuilder()
-		.setName('start')
-		.setDescription('接啊你倒是')
+		.setName('set-length')
+		.setDescription('设定游戏字数')
     .addIntegerOption(option => option.setName('length').setDescription('设置游戏字数')),
   
   async execute(interaction)
@@ -13,11 +13,11 @@ module.exports =
     const length = interaction.options.getInteger('length');
     if (!length)
     {
-      await interaction.reply({ content: `*退！要设置字数的！*` });      
+      await interaction.reply({ content: `*退！字数无效！*` });      
     }
     else
     {
-      await interaction.reply({ content: `*嗬！字数设定为* **${length}**`, components: [ui.CreateButtonRow()] });
+      await interaction.reply({ content: `*嗬！字数设定为* **${length}**` });
     }
 	},
 };
