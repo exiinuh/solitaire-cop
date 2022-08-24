@@ -8,8 +8,8 @@ async function Check(answer, channelName) {
   await database.GetKeyValues([channelName, lengthKey]).then(
     values => {
       //console.log(values);
-      const history = values[0];
-      const length = values[1];
+      var history = values[0];
+      var length = values[1];
 
       if (history === null) {
         history = [];
