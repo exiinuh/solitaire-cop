@@ -12,11 +12,11 @@ module.exports =
   async execute(interaction) {
     const length = interaction.options.getInteger('length');
     if (!length) {
-      await interaction.reply({ content: `*退！要设置字数的！*` });
+      await interaction.reply({ content: `*退!要设置字数的!*` });
     }
     else {
       await cop.SetLength(length, interaction.channel.name);
-      await interaction.reply({ content: `*嗬！字数设定为* **${length}**`, components: [ui.CreateButtonRow()] });
+      await interaction.reply({ content: `*嗬!字数设定为* **${length}**`, components: [ui.CreateButtonRow()] });
     }
   },
 };

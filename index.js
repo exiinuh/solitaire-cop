@@ -28,17 +28,17 @@ client.on(
     if (interaction.isButton()) {
       if (interaction.customId === `hetui`) {
         //Show the modal to the user
-        const modal = ui.CreateModal('tuiModal', `退！`, `嗬！`, 'SHORT');
+        const modal = ui.CreateModal('tuiModal', `嗬!`, `输入下一个词汇`, 'SHORT');
         await interaction.showModal(modal);
       }
       else
         if (interaction.customId === `alarm`) {
           console.log(interaction);
-          return interaction.reply({ content: `<@${interaction.user.id}>: <@${process.env.ADMIN_ID}>*快点干活啦！*` });
+          return interaction.reply({ content: `<@${interaction.user.id}>: <@${process.env.ADMIN_ID}>*快点干活啦!*` });
         }
         else
           if (interaction.customId === 'nope') {
-            const modal = ui.CreateModal('nopeModal', `回溯进程`, `你的行为可能会摧毁友谊，确认请输入YES.`, 'SHORT');
+            const modal = ui.CreateModal('nopeModal', `退!`, `你的行为可能会摧毁友谊，确认请输入YES.`, 'SHORT');
             await interaction.showModal(modal);
           }
     }

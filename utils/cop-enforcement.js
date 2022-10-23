@@ -53,7 +53,7 @@ async function Check(answer, channelName) {
                 multiple: true
               });
 
-            console.log(lastWordPinyin);
+            console.log(lastWordPinyin + " " + lastAnswer);
             console.log(firstWordPinyin);
 
             const filteredArray = lastWordPinyin.filter(value => firstWordPinyin.includes(value));

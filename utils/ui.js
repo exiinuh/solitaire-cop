@@ -1,12 +1,11 @@
 const { MessageActionRow, MessageButton, Modal, TextInputComponent } = require('discord.js');
 
-function CreateModal(id, title, label, style)
-{
+function CreateModal(id, title, label, style) {
   // Create the modal
-	const modal = new Modal()
-		.setCustomId(id)
-		.setTitle(title);
-  
+  const modal = new Modal()
+    .setCustomId(id)
+    .setTitle(title);
+
   const textId = id + 'Input';
   // Add components to modal
   const input = new TextInputComponent()
@@ -15,56 +14,50 @@ function CreateModal(id, title, label, style)
     .setStyle(style);
   const row = new MessageActionRow().addComponents(input);
 
-    // Add inputs to the modal
+  // Add inputs to the modal
   modal.addComponents(row);
-  
-	return modal;
+
+  return modal;
 }
 
-function CreateButtons(buttons)
-{
+function CreateButtons(buttons) {
   const row = new MessageActionRow()
     .addComponents(buttons);
   return row;
 }
 
-function CreateButton(id, label, emoji, style)
-{
+function CreateButton(id, label, emoji, style) {
   var button = null;
-  if (label == "")
-  {   
+  if (label == "") {
     button = new MessageButton()
       .setCustomId(id)
       .setEmoji(emoji)
       .setStyle(style)
   }
-  else
-  {
+  else {
     button = new MessageButton()
       .setCustomId(id)
       .setLabel(label)
       .setStyle(style)
   }
-  
+
   return button;
 }
 
-function CreateButtonRow()
-{
-  var primaryButton = CreateButton('hetui', `退！`, "", `PRIMARY`);
+function CreateButtonRow() {
+  var primaryButton = CreateButton('hetui', `嗬!`, "", `PRIMARY`);
   var alarmButton = CreateButton('alarm', `报警`, "", `SUCCESS`);
-  var nopeButton = CreateButton('nope', "", '❌', `SECONDARY`);
+  var nopeButton = CreateButton('nope', "退!", '❌', `DANGER`);
   //nopeButton.setDisabled(true);
-  const buttons = [primaryButton, alarmButton, nopeButton];
-  return CreateButtons(buttons);  
+  const buttons = [primaryButton, nopeButton, alarmButton];
+  return CreateButtons(buttons);
 }
 
-function ParseWord(message)
-{
+function ParseWord(message) {
   const array = message.split('【');
   const msgHalf = array[array.length - 1];
-  const arrayLeft = msgHalf.split('】');    
-  return arrayLeft[0]; 
+  const arrayLeft = msgHalf.split('】');
+  return arrayLeft[0];
 }
 
 module.exports = { CreateModal, CreateButtonRow, ParseWord };

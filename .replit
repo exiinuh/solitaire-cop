@@ -79,3 +79,7 @@ support = true
       sourceMaps = true
       stopOnEntry = false
       type = "pwa-node"
+
+[auth]
+pageEnabled = true
+buttonEnabled = false
