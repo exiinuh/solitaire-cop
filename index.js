@@ -1,5 +1,7 @@
-const { Client, Intents } = require('discord.js');
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+const { Client, GatewayIntentBits } = require('discord.js')
+const client = new Client({
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]
+});
 
 const command = require("./utils/command");
 const cop = require("./utils/cop-enforcement");
@@ -28,7 +30,7 @@ client.on(
     if (interaction.isButton()) {
       if (interaction.customId === `hetui`) {
         //Show the modal to the user
-        const modal = ui.CreateModal('tuiModal', `嗬!`, `输入下一个词汇`, 'SHORT');
+        const modal = ui.CreateDialog('tuiModal', `嗬!`, `输入下一个词汇`, 'SHORT');
         await interaction.showModal(modal);
       }
       else
@@ -38,7 +40,7 @@ client.on(
         }
         else
           if (interaction.customId === 'nope') {
-            const modal = ui.CreateModal('nopeModal', `退!`, `你的行为可能会摧毁友谊，确认请输入YES.`, 'SHORT');
+            const modal = ui.CreateDialog('nopeModal', `退!`, `你的行为可能会摧毁友谊，确认请输入YES.`, 'SHORT');
             await interaction.showModal(modal);
           }
     }
@@ -58,7 +60,7 @@ client.on(
               switch (result) {
                 case cop.CheckResult.SUCCESS:
                   interaction.message.edit({ components: [] });
-                  return interaction.reply({ content: `${interaction.user}: *嗬!* **【${answer}】**`, components: [ui.CreateButtonRow()] });
+                  return interaction.reply({ content: `${interaction.user}: *嗬!* **【${answer}】**`, components: [ui.CreateInteractionButtons()] });
 
                 case cop.CheckResult.DUPLICATE:
                   return interaction.reply(`${interaction.user}: *退!* **【${answer}】** *重复警告!*`);
@@ -98,7 +100,7 @@ client.on(
                     .then(
                       () => interaction.message.edit({ components: [] })
                     );
-                  return interaction.reply({ content: `回溯: *嗬!* **【${result}】**`, components: [ui.CreateButtonRow()] });
+                  return interaction.reply({ content: `回溯: *嗬!* **【${result}】**`, components: [ui.CreateInteractionButtons()] });
                 }
                 else {
                   return interaction.reply(`*重新开始!*`);

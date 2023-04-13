@@ -1,18 +1,22 @@
-const { MessageActionRow, MessageButton, Modal, TextInputComponent } = require('discord.js');
+const {
+  ModalBuilder, ActionRowBuilder,
+  ButtonBuilder, ButtonStyle,
+  TextInputBuilder, TextInputStyle
+} = require('discord.js');
 
 function CreateModal(id, title, label, style) {
   // Create the modal
-  const modal = new Modal()
+  const modal = new ModalBuilder()
     .setCustomId(id)
     .setTitle(title);
 
   const textId = id + 'Input';
   // Add components to modal
-  const input = new TextInputComponent()
+  const input = new TextInputBuilder()
     .setCustomId(textId)
     .setLabel(label)
     .setStyle(style);
-  const row = new MessageActionRow().addComponents(input);
+  const row = new ActionRowBuilder().addComponents(input);
 
   // Add inputs to the modal
   modal.addComponents(row);
@@ -21,7 +25,7 @@ function CreateModal(id, title, label, style) {
 }
 
 function CreateButtons(buttons) {
-  const row = new MessageActionRow()
+  const row = new ActionRowBuilder()
     .addComponents(buttons);
   return row;
 }
@@ -29,13 +33,13 @@ function CreateButtons(buttons) {
 function CreateButton(id, label, emoji, style) {
   var button = null;
   if (label == "") {
-    button = new MessageButton()
+    button = new ButtonBuilder()
       .setCustomId(id)
       .setEmoji(emoji)
       .setStyle(style)
   }
   else {
-    button = new MessageButton()
+    button = new ButtonBuilder()
       .setCustomId(id)
       .setLabel(label)
       .setStyle(style)
@@ -44,10 +48,14 @@ function CreateButton(id, label, emoji, style) {
   return button;
 }
 
-function CreateButtonRow() {
-  var primaryButton = CreateButton('hetui', `嗬!`, "", `PRIMARY`);
-  var alarmButton = CreateButton('alarm', `报警`, "", `SUCCESS`);
-  var nopeButton = CreateButton('nope', "退!", '❌', `DANGER`);
+function CreateDialog(id, title, label) {
+  return CreateModal(id, title, label, TextInputStyle.Short)
+}
+
+function CreateInteractionButtons() {
+  var primaryButton = CreateButton('hetui', `嗬!`, "", ButtonStyle.Primary);
+  var alarmButton = CreateButton('alarm', `报警`, "", ButtonStyle.Success);
+  var nopeButton = CreateButton('nope', "退!", '❌', ButtonStyle.Danger);
   //nopeButton.setDisabled(true);
   const buttons = [primaryButton, nopeButton, alarmButton];
   return CreateButtons(buttons);
@@ -60,4 +68,4 @@ function ParseWord(message) {
   return arrayLeft[0];
 }
 
-module.exports = { CreateModal, CreateButtonRow, ParseWord };
+module.exports = { CreateDialog, CreateInteractionButtons, ParseWord };
