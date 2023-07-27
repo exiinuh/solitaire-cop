@@ -7,7 +7,11 @@ module.exports =
   data: new SlashCommandBuilder()
     .setName('set-length')
     .setDescription('设定游戏字数')
-    .addIntegerOption(option => option.setName('length').setDescription('设置游戏字数')),
+    .addIntegerOption(option =>
+      option
+        .setName('length')
+        .setDescription('设置游戏字数')
+        .setRequired(true)),
 
   async execute(interaction) {
     const length = interaction.options.getInteger('length');

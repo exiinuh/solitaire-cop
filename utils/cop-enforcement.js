@@ -7,7 +7,7 @@ async function Check(answer, channelName) {
   const lengthKey = channelName + "_length";
   await database.GetKeyValues([channelName, lengthKey]).then(
     values => {
-      //console.log(values);
+      console.log(values);
       var history = values[0];
       var length = values[1];
 
@@ -98,8 +98,13 @@ async function Revert(answer, channelName) {
 }
 
 async function SetLength(length, channelName) {
+  await Clear(channelName);
   const lengthKey = channelName + "_length";
   await database.SetKey(lengthKey, length);
+}
+
+async function Clear(channelName) {
+  await database.SetKey(channelName, []);
 }
 
 const CheckResult =
@@ -110,4 +115,4 @@ const CheckResult =
   INVALID_CONTEXT: 3
 }
 
-module.exports = { CheckResult, Check, Revert, SetLength };
+module.exports = { CheckResult, Check, Revert, SetLength, Clear };

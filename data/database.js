@@ -23,48 +23,39 @@ const db = new replit_database();
 // app.use(bodyparser.json());
 
 
-async function SetKey(key, value)
-{
-  await db.set(key, value);    
+async function SetKey(key, value) {
+  await db.set(key, value);
 }
 
-async function DeleteKey(key)
-{
+async function DeleteKey(key) {
   await db.delete(key);
 }
 
-async function GetKeyValue(key)
-{
+async function GetKeyValue(key) {
   let value = await db.get(key);
   //console.log("||" + key + ": " +　value);
   return value;
 }
 
-async function GetKeyValues(keys)
-{
+async function GetKeyValues(keys) {
   const promises = [];
-  for(var key of keys)
-  {
+  for (var key of keys) {
     promises.push(GetKeyValue(key));
   }
-  
+
   return await Promise.all(promises);
 }
 
-async function GetPair(key)
-{
+async function GetPair(key) {
   let value = await db.get(key);
   return [key, value];
 }
 
-function Show()
-{
+function Show() {
   db.list().then(
-    keys => 
-    {
+    keys => {
       const promises = [];
-      for(var key of keys)
-      {
+      for (var key of keys) {
         // let promise = new Promise(
         //   resolve =>
         //   {
@@ -74,22 +65,20 @@ function Show()
         //         resolve([key, value]);
         //       });
         //   });
-        
+
         promises.push(GetPair(key));
       }
 
       Promise.all(promises).then(
-        results =>
-        {
-          for(var history of results)
-          {
+        results => {
+          for (var history of results) {
             const channel_name = history[0];
             const context = history[1];
-            console.log(channel_name + "\n" + context);
+            //console.log(channel_name + "\n" + context);
           }
         });
     });
-  
+
   // db.list().then(
   //   keys =>
   //   {
@@ -100,30 +89,26 @@ function Show()
   //   });
 }
 
-function Load(jsonFile)
-{
+function Load(jsonFile) {
   var list = file.GetList("data", jsonFile);
   var fileName = list[0];
 
   // Read history.json file
   fs.readFile(
-    fileName, 
-    function(err, data) 
-    {      
+    fileName,
+    function(err, data) {
       // Check for errors
-      if (err) 
-      {      
+      if (err) {
         console.log(err);
         throw err;
       }
-     
+
       // Converting to JSON
       let json = JSON.parse(data);
 
       // Init db
       history = json["history"];
-      for(let i = 0; i < history.length; i++) 
-      {
+      for (let i = 0; i < history.length; i++) {
         let obj = history[i];
 
         console.log(obj);
@@ -134,27 +119,22 @@ function Load(jsonFile)
     });
 }
 
-function Dump(jsonFile)
-{
+function Dump(jsonFile) {
   db.list().then(
-    keys => 
-    {
+    keys => {
       const promises = [];
-      for(var key of keys)
-      {
+      for (var key of keys) {
         promises.push(GetPair(key));
       }
 
       Promise.all(promises).then(
-        results =>
-        {
-          var jsonObj = 
+        results => {
+          var jsonObj =
           {
-            history : []
+            history: []
           };
-          
-          for(var history of results)
-          {
+
+          for (var history of results) {
             jsonObj.history.push(
               {
                 channel_name: history[0],
@@ -164,17 +144,17 @@ function Dump(jsonFile)
 
           var json = JSON.stringify(jsonObj, null, "\t");
           console.log(json);
-        // won't persist due to security issue
-        //   fs.writeFile(
-        //     jsonFile, json, 'utf8', 
-        //     function(err, data)
-        //     {
-        //       if(err)
-        //       {
-        //         console.log(err);
-        //       }
-        //       console.log("File dumped.");
-        //     });
+          // won't persist due to security issue
+          //   fs.writeFile(
+          //     jsonFile, json, 'utf8', 
+          //     function(err, data)
+          //     {
+          //       if(err)
+          //       {
+          //         console.log(err);
+          //       }
+          //       console.log("File dumped.");
+          //     });
         });
     });
 }
