@@ -60,7 +60,7 @@ client.on(
               switch (result) {
                 case cop.CheckResult.SUCCESS:
                   interaction.message.edit({ components: [] });
-                  return interaction.reply({ content: `${interaction.user}: *嗬!* **【${answer}】**`, components: [ui.CreateInteractionButtons()] });
+                  return interaction.reply({ content: `${interaction.user}: *嗬!* **【${answer}】**`, components: [ui.CreateInteractionButtons(answer)] });
 
                 case cop.CheckResult.DUPLICATE:
                   return interaction.reply(`${interaction.user}: *退!* **【${answer}】** *重复警告!*`);
@@ -100,7 +100,7 @@ client.on(
                     .then(
                       () => interaction.message.edit({ components: [] })
                     );
-                  return interaction.reply({ content: `回溯: *嗬!* **【${result}】**`, components: [ui.CreateInteractionButtons()] });
+                  return interaction.reply({ content: `回溯: *嗬!* **【${result}】**`, components: [ui.CreateInteractionButtons(answer)] });
                 }
                 else {
                   return interaction.reply(`*重新开始!*`);

@@ -30,19 +30,26 @@ function CreateButtons(buttons) {
   return row;
 }
 
-function CreateButton(id, label, emoji, style) {
+function CreateButton(id, label, emoji, style, url) {
   var button = null;
-  if (label == "") {
+
+  if (style != ButtonStyle.Link) {
     button = new ButtonBuilder()
       .setCustomId(id)
-      .setEmoji(emoji)
-      .setStyle(style)
+      .setStyle(style);
+
+    if (label == "") {
+      button.setEmoji(emoji);
+    }
+    else {
+      button.setLabel(label);
+    }
   }
   else {
     button = new ButtonBuilder()
-      .setCustomId(id)
       .setLabel(label)
-      .setStyle(style)
+      .setURL(url)
+      .setStyle(style);
   }
 
   return button;
@@ -52,12 +59,24 @@ function CreateDialog(id, title, label) {
   return CreateModal(id, title, label, TextInputStyle.Short)
 }
 
-function CreateInteractionButtons() {
+function CreateInteractionButtons(searchContent) {
   var primaryButton = CreateButton('hetui', `嗬!`, "", ButtonStyle.Primary);
   var alarmButton = CreateButton('alarm', `报警`, "", ButtonStyle.Success);
-  var nopeButton = CreateButton('nope', "退!", '❌', ButtonStyle.Danger);
-  //nopeButton.setDisabled(true);
-  const buttons = [primaryButton, nopeButton, alarmButton];
+  var nopeButton = CreateButton('nope', `退!`, '❌', ButtonStyle.Danger);
+
+  let buttons = [];
+  if (searchContent != '') {
+    var searchButton = CreateButton(
+      '', `嗖!`, "", ButtonStyle.Link,
+      `https://google.com/search?q=${searchContent}`
+    );
+
+    buttons = [primaryButton, nopeButton, searchButton, alarmButton];
+  }
+  else {
+    buttons = [primaryButton, nopeButton, alarmButton];
+  }
+
   return CreateButtons(buttons);
 }
 
