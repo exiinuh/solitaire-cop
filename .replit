@@ -83,3 +83,7 @@ support = true
 [auth]
 pageEnabled = true
 buttonEnabled = false
+
+[deployment]
+run = ["sh", "-c", "node index.js"]
+deploymentTarget = "cloudrun"
