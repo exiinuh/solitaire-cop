@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits } = require('discord.js')
+const { Client, GatewayIntentBits, Events } = require('discord.js')
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]
 });
@@ -14,7 +14,7 @@ client.commands = command.Initialize();
 
 // main
 client.once(
-  'ready',
+  Events.ClientReady,
   () => {
     console.log('Connected.');
 
@@ -25,7 +25,7 @@ client.once(
   });
 
 client.on(
-  'interactionCreate',
+  Events.InteractionCreate,
   async interaction => {
     if (interaction.isButton()) {
       if (interaction.customId === `hetui`) {
@@ -36,7 +36,7 @@ client.on(
       else
         if (interaction.customId === `alarm`) {
           console.log(interaction);
-          return interaction.reply({ content: `<@${interaction.user.id}>: <@${process.env.ADMIN_ID}>*快点干活啦!*` });
+          await interaction.reply({ content: `<@${interaction.user.id}>: <@${process.env.ADMIN_ID}>*快点干活啦!*` });
         }
         else
           if (interaction.customId === 'nope') {
@@ -51,25 +51,29 @@ client.on(
 
           // empty answer is not acceptable
           if (!answer) {
-            return interaction.reply(`${interaction.user}: *退!* *捣乱警告!*`);
+            await interaction.reply(`${interaction.user}: *退!* *捣乱警告!*`);
           }
 
           // validate the answer
           cop.Check(answer, interaction.channel.name).then(
-            result => {
+            async result => {
               switch (result) {
                 case cop.CheckResult.SUCCESS:
-                  interaction.message.edit({ components: [] });
-                  return interaction.reply({ content: `${interaction.user}: *嗬!* **【${answer}】**`, components: [ui.CreateInteractionButtons(answer)] });
+                  await interaction.message.edit({ components: [] });
+                  await interaction.reply({ content: `${interaction.user}: *嗬!* **【${answer}】**`, components: [ui.CreateInteractionButtons(answer)] });
+                  break;
 
                 case cop.CheckResult.DUPLICATE:
-                  return interaction.reply(`${interaction.user}: *退!* **【${answer}】** *重复警告!*`);
+                  await interaction.reply(`${interaction.user}: *退!* **【${answer}】** *重复警告!*`);
+                  break;
 
                 case cop.CheckResult.INVALID_LENGTH:
-                  return interaction.reply(`${interaction.user}: *退!* **【${answer}】** *字数不符合!*`);
+                  await interaction.reply(`${interaction.user}: *退!* **【${answer}】** *字数不符合!*`);
+                  break;
 
                 case cop.CheckResult.INVALID_CONTEXT:
-                  return interaction.reply(`${interaction.user}: *退!* **【${answer}】** *首尾不相连!*`);
+                  await interaction.reply(`${interaction.user}: *退!* **【${answer}】** *首尾不相连!*`);
+                  break;
 
                 default:
                   // code block
@@ -93,17 +97,17 @@ client.on(
 
             const answer = ui.ParseWord(interaction.message.content);
             cop.Revert(answer, interaction.channel.name).then(
-              result => {
+              async result => {
                 if (result != "") {
                   interaction.message
                     .react('❌')
                     .then(
                       () => interaction.message.edit({ components: [] })
                     );
-                  return interaction.reply({ content: `回溯: *嗬!* **【${result}】**`, components: [ui.CreateInteractionButtons(answer)] });
+                  await interaction.reply({ content: `回溯: *嗬!* **【${result}】**`, components: [ui.CreateInteractionButtons(answer)] });
                 }
                 else {
-                  return interaction.reply(`*重新开始!*`);
+                  await interaction.reply(`*重新开始!*`);
                 }
               });
           }
