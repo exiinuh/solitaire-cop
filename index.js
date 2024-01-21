@@ -16,12 +16,7 @@ client.commands = command.Initialize();
 client.once(
   Events.ClientReady,
   () => {
-    console.log('Connected.');
-
-    // show history
-    database.Show();
-    //database.Load('history.json');
-    //database.Dump('history.json');
+    database.Load();
   });
 
 client.on(
@@ -75,6 +70,9 @@ client.on(
                   await interaction.reply(`${interaction.user}: *退!* **【${answer}】** *首尾不相连!*`);
                   break;
 
+                case cop.CheckResult.MISSING_LENGTH:
+                  await interaction.reply(`${interaction.user}: *退!* *未设定字数长度!*`);
+                  break;
                 default:
                   // code block
                   console.log("???");
@@ -97,17 +95,18 @@ client.on(
 
             const answer = ui.ParseWord(interaction.message.content);
             cop.Revert(answer, interaction.channel.name).then(
-              async result => {
-                if (result != "") {
-                  interaction.message
-                    .react('❌')
-                    .then(
-                      () => interaction.message.edit({ components: [] })
-                    );
-                  await interaction.reply({ content: `回溯: *嗬!* **【${result}】**`, components: [ui.CreateInteractionButtons(answer)] });
+              async lastAnswer => {
+                interaction.message
+                  .react('❌')
+                  .then(
+                    () => interaction.message.edit({ components: [] })
+                  );
+                
+                if (lastAnswer != "") {
+                  await interaction.reply({ content: `回溯: *嗬!* **【${lastAnswer}】**`, components: [ui.CreateInteractionButtons(answer)] });
                 }
                 else {
-                  await interaction.reply(`*重新开始!*`);
+                  await interaction.reply({ content:`*重新开始!*`, components: [ui.CreateInteractionButtons("")] });
                 }
               });
           }

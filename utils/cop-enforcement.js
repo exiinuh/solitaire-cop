@@ -4,76 +4,79 @@ const database = require("../data/database");
 
 async function Check(answer, channelName) {
   var result;
-  const lengthKey = channelName + "_length";
-  await database.GetKeyValues([channelName, lengthKey]).then(
-    values => {
-      console.log(values);
-      var history = values[0];
-      var length = values[1];
 
-      if (history === null) {
-        history = [];
+  await database.GetCurrentLength(channelName).then(
+    async current_length => {
+      if (current_length == null) {
+        result = CheckResult.MISSING_LENGTH;
+        return result;
       }
 
-      if (length == null) {
-        // default
-        let length = 3;
-      }
+      await database.GetHistory(channelName, current_length).then(
+        async data => {
+          history = [];
+          if (data != null) {
+            history = data;
+          }
 
-      // check length
-      if (answer.length != length) {
-        result = CheckResult.INVALID_LENGTH;
-      }
-      else
-        // check duplication
-        if (history.includes(answer)) {
-          console.log("duplicate");
-          result = CheckResult.DUPLICATE;
-        }
-        else {
-          // check pinyin
-          var success = true;
-          if (history.length > 0) {
-            const lastAnswer = history[history.length - 1];
-            const lastWord = lastAnswer[lastAnswer.length - 1];
-            const lastWordPinyin = pinyin(
-              lastWord,
-              {
-                toneType: 'none',
-                type: 'array',
-                multiple: true
-              });
+          // check length
+          if (answer.length != current_length) {
+            console.log("wrong length");
+            result = CheckResult.INVALID_LENGTH;
+          }
+          else {
+            if (history.length > 0) {
+              // check duplication
+              if (history.includes(answer)) {
+                console.log("duplicate");
+                result = CheckResult.DUPLICATE;
+              }
+              else {
+                // check pinyin            
+                const lastAnswer = history[history.length - 1];
+                const lastWord = lastAnswer[lastAnswer.length - 1];
+                const lastWordPinyin = pinyin(
+                  lastWord,
+                  {
+                    toneType: 'none',
+                    type: 'array',
+                    multiple: true
+                  });
 
-            const firstWord = answer[0];
-            const firstWordPinyin = pinyin(
-              firstWord,
-              {
-                toneType: 'none',
-                type: 'array',
-                multiple: true
-              });
+                const firstWord = answer[0];
+                const firstWordPinyin = pinyin(
+                  firstWord,
+                  {
+                    toneType: 'none',
+                    type: 'array',
+                    multiple: true
+                  });
 
-            console.log(lastWordPinyin + " " + lastAnswer);
-            console.log(firstWordPinyin);
+                console.log(lastWordPinyin + " " + lastAnswer);
+                console.log(firstWordPinyin);
 
-            const filteredArray = lastWordPinyin.filter(value => firstWordPinyin.includes(value));
-            if (filteredArray.length == 0) {
-              success = false;
+                const filteredArray = lastWordPinyin.filter(value => firstWordPinyin.includes(value));
+                if (filteredArray.length != 0) {
+                  console.log("success");
+                  result = CheckResult.SUCCESS;
+                }
+                else {
+                  console.log("invalid context");
+                  result = CheckResult.INVALID_CONTEXT;
+                }
+              }
+            }
+            else {
+              console.log("success");
+              result = CheckResult.SUCCESS;
             }
           }
 
-          if (!success) {
-            console.log("invalid context");
-            result = CheckResult.INVALID_CONTEXT;
-          }
-          else {
+          if (result == CheckResult.SUCCESS) {
             history.push(answer);
-            database.SetKey(channelName, history);
-
-            console.log("success");
-            result = CheckResult.SUCCESS;
+            database.SetHistory(channelName, current_length, history);
           }
-        }
+        });
     });
 
   return result;
@@ -81,30 +84,33 @@ async function Check(answer, channelName) {
 
 async function Revert(answer, channelName) {
   var lastAnswer = "";
-  await database.GetKeyValue(channelName)
-    .then(
-      history => {
-        // remove from database
-        const index = history.indexOf(answer);
-        history.splice(index, 1);
-        database.SetKey(channelName, history);
 
-        if (history.length > 0) {
-          lastAnswer = history[history.length - 1];
-        }
-      });
+  await database.GetCurrentLength(channelName).then(
+    async current_length => {
+      if (current_length != null) {
+        await database.GetHistory(channelName, current_length).then(
+          history => {
+            // remove from database
+            const index = history.indexOf(answer);
+            history.splice(index, 1);
+            database.SetHistory(channelName, current_length, history);
+
+            if (history.length > 0) {
+              lastAnswer = history[history.length - 1];
+            }
+          });
+      }
+    });
 
   return lastAnswer;
 }
 
 async function SetLength(length, channelName) {
-  await Clear(channelName);
-  const lengthKey = channelName + "_length";
-  await database.SetKey(lengthKey, length);
+  await database.SetCurrentLength(channelName, length);
 }
 
 async function Clear(channelName) {
-  await database.SetKey(channelName, []);
+  await database.Clear(channelName);
 }
 
 const CheckResult =
@@ -112,7 +118,8 @@ const CheckResult =
   SUCCESS: 0,
   DUPLICATE: 1,
   INVALID_LENGTH: 2,
-  INVALID_CONTEXT: 3
+  INVALID_CONTEXT: 3,
+  MISSING_LENGTH: 4
 }
 
 module.exports = { CheckResult, Check, Revert, SetLength, Clear };
