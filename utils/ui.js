@@ -60,8 +60,8 @@ function CreateDialog(id, title, label) {
 }
 
 function CreateInteractionButtons(searchContent) {
-  var primaryButton = CreateButton('hetui', `嗬!`, "", ButtonStyle.Primary);
-  var alarmButton = CreateButton('alarm', `报警`, "", ButtonStyle.Success);
+  var primaryButton = CreateButton('hetui', `嗬!`, "", ButtonStyle.Success);
+  var alarmButton = CreateButton('alarm', `报警`, "", ButtonStyle.Primary);
   var nopeButton = CreateButton('nope', `退!`, '❌', ButtonStyle.Danger);
 
   let buttons = [];
