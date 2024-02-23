@@ -26,7 +26,7 @@
     "node": "^21.2.0",
     "node-fetch": "^3.2.6",
     "node-json-db": "^2.3.0",
-    "pinyin-pro": "^3.10.2"
+    "pinyin-pro": "^3.19.5"
   },
   "keywords": [
     "discord",
